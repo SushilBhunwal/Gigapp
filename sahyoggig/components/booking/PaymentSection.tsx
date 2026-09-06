@@ -9,7 +9,7 @@ import { toast } from "sonner";
 type PaymentProps = {
   bookingId: string;
   status: string;
-  payment: { status: string; reference: string | null } | null;
+  payment: { status: string; mockReference: string | null } | null;
 };
 
 export function PaymentSection({ bookingId, status, payment }: PaymentProps) {

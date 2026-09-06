@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 
-export function CommissionForm({ coopId, initialPct }: { coopId: string; initialPct: number }) {
+export function CommissionForm({ cooperativeId, initialCommission }: { cooperativeId: string; initialCommission: number }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -23,14 +23,14 @@ export function CommissionForm({ coopId, initialPct }: { coopId: string; initial
   } = useForm<UpdateCommissionInput>({
     resolver: zodResolver(UpdateCommissionSchema),
     defaultValues: {
-      commissionPct: initialPct,
+      commissionPct: initialCommission,
     },
   });
 
   const onSubmit = async (data: UpdateCommissionInput) => {
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/cooperatives/${coopId}/commission`, {
+      const res = await fetch(`/api/cooperatives/${cooperativeId}/commission`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
