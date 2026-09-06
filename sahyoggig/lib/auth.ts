@@ -1,19 +1,14 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { LoginSchema } from "@/lib/zod-schemas";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  // NOTE: Using JWT sessions (not database sessions) because the Credentials
-  // provider does not work reliably with database sessions in NextAuth v5.
-  // Role and user id are stored in the JWT token and read from there.
+  // JWT sessions — required for Credentials provider in NextAuth v5.
+  // PrismaAdapter intentionally removed: it conflicts with jwt+Credentials strategy.
   session: { strategy: "jwt" },
-
-  // Prisma adapter is still used for other providers if added later,
-  // but Credentials provider doesn't create sessions in DB.
-  adapter: PrismaAdapter(prisma),
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
 
   providers: [
     CredentialsProvider({
