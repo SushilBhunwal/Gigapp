@@ -1,10 +1,11 @@
 export const dynamic = "force-dynamic";
+import { LogoutButton } from "@/components/auth/LogoutButton";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { Wrench, Droplet, BookOpen, Sparkles, Heart } from "lucide-react";
+import { Wrench, Droplet, BookOpen, Sparkles, Heart, ClipboardList } from "lucide-react";
 
 // Map some common seeded categories to icons
 const getIcon = (name: string) => {
@@ -26,8 +27,21 @@ export default async function CustomerDashboard() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white border-b px-6 py-4 flex items-center justify-between">
+        <h1 className="text-xl font-bold text-gray-900">SahyogGig</h1>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-muted-foreground">Hi, {session.user?.name}</span>
+          <Link href="/dashboard/bookings" className="flex items-center gap-1 text-sm text-blue-600 hover:underline">
+            <ClipboardList className="w-4 h-4" />
+            My Bookings
+          </Link>
+          <LogoutButton />
+        </div>
+      </header>
+
+      <div className="max-w-4xl mx-auto space-y-8 p-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">What do you need help with?</h1>
           <p className="text-muted-foreground mt-2">Select a service to find verified professionals near you.</p>
