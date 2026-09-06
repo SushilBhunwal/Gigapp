@@ -24,7 +24,7 @@ export function PaymentSection({ bookingId, status, payment }: PaymentProps) {
           <CheckCircle2 className="w-6 h-6 mr-2" />
           Payment Successful
         </div>
-        <p className="text-green-600 text-sm">Reference: {payment.reference}</p>
+        <p className="text-green-600 text-sm">Reference: {payment.mockReference}</p>
       </div>
     );
   }
