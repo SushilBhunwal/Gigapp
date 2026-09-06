@@ -1,0 +1,119 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  phone        String?
+  passwordHash String
+  role         Role     @default(CUSTOMER)
+  createdAt    DateTime @default(now())
+
+  workerProfile      Worker?
+  cooperativeAdmin   Cooperative? @relation("AdminOf")
+  bookingsAsCustomer Booking[]    @relation("CustomerBookings")
+  reviewsWritten     Review[]
+}
+
+enum Role {
+  CUSTOMER
+  WORKER
+  COOP_ADMIN
+  SUPER_ADMIN
+}
+
+model Cooperative {
+  id            String   @id @default(cuid())
+  name          String
+  region        String
+  commissionPct Float    @default(10)
+  adminId       String   @unique
+  admin         User     @relation("AdminOf", fields: [adminId], references: [id])
+  workers       Worker[]
+  createdAt     DateTime @default(now())
+}
+
+model Worker {
+  id                String          @id @default(cuid())
+  userId            String          @unique
+  user              User            @relation(fields: [userId], references: [id])
+  cooperativeId     String
+  cooperative       Cooperative     @relation(fields: [cooperativeId], references: [id])
+  serviceCategoryId String
+  serviceCategory   ServiceCategory @relation(fields: [serviceCategoryId], references: [id])
+  isVerified        Boolean         @default(false)
+  isAvailable       Boolean         @default(false)
+  latitude          Float?
+  longitude         Float?
+  ratingAvg         Float           @default(0)
+  totalJobs         Int             @default(0)
+  bookings          Booking[]
+}
+
+model ServiceCategory {
+  id      String   @id @default(cuid())
+  name    String // "Electrician", "Plumber", "Tutor", "Cleaner", "Elder Care"
+  icon    String?
+  workers Worker[]
+}
+
+model Booking {
+  id            String        @id @default(cuid())
+  customerId    String
+  customer      User          @relation("CustomerBookings", fields: [customerId], references: [id])
+  workerId      String
+  worker        Worker        @relation(fields: [workerId], references: [id])
+  status        BookingStatus @default(REQUESTED)
+  scheduledAt   DateTime
+  address       String
+  amount        Float
+  commissionAmt Float
+  payoutAmt     Float
+  createdAt     DateTime      @default(now())
+  review        Review?
+  payment       Payment?
+}
+
+enum BookingStatus {
+  REQUESTED
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  bookingId String   @unique
+  booking   Booking  @relation(fields: [bookingId], references: [id])
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  rating    Int // 1-5
+  comment   String?
+  createdAt DateTime @default(now())
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  bookingId     String        @unique
+  booking       Booking       @relation(fields: [bookingId], references: [id])
+  mockReference String? // simulated transaction ref, e.g. `MOCK-${cuid()}`
+  status        PaymentStatus @default(PENDING)
+  createdAt     DateTime      @default(now())
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
