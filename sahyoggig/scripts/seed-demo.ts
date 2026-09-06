@@ -13,8 +13,8 @@ async function main() {
 
   console.log("Seeding Demo Data...");
 
-  // A basic bcrypt hash for "password123"
-  const passwordHash = "$2a$12$Y/B1v2qQk/Fk9zZ7hW0u.e6x/Uj1hG6m8pT7rD6lHq1zY9vK2kP.W";
+  // A valid bcryptjs hash for "password123"
+  const passwordHash = "$2b$10$QYhZobgWWbFiGZGHxG5rDezGbDZxlfrTtrrBUyhAFK87Hx9Y7ixSa";
 
   // 1. Create Base Users
   const customer = await prisma.user.create({
@@ -38,6 +38,15 @@ async function main() {
   });
   const catCleaner = await prisma.serviceCategory.create({
     data: { id: "cat-cleaner", name: "Cleaner", icon: "Sparkles" }
+  });
+  const catTutor = await prisma.serviceCategory.create({
+    data: { id: "cat-tutor", name: "Tutor", icon: "BookOpen" }
+  });
+  const catElderCare = await prisma.serviceCategory.create({
+    data: { id: "cat-eldercare", name: "Elder Care", icon: "Heart" }
+  });
+  const catCarpenter = await prisma.serviceCategory.create({
+    data: { id: "cat-carpenter", name: "Carpenter", icon: "Hammer" }
   });
 
   // 4. Create 5 Workers (Verified, Available, specific lat/lngs in Bengaluru)

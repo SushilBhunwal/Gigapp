@@ -7,6 +7,8 @@ import { WorkerTable } from "@/components/admin/WorkerTable";
 import { CommissionForm } from "@/components/admin/CommissionForm";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { AnalyticsCharts } from "@/components/admin/AnalyticsCharts";
+import { DemandForecast } from "@/components/admin/DemandForecast";
+import { ClientHeatmapWrapper } from "@/components/admin/ClientHeatmapWrapper";
 import { format, subDays } from "date-fns";
 
 export default async function AdminDashboard() {
@@ -31,7 +33,7 @@ export default async function AdminDashboard() {
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-  const [workers, completedBookings] = await Promise.all([
+  const [workers, allBookings] = await Promise.all([
     prisma.worker.findMany({
       where: { cooperativeId: coop.id },
       include: { 
@@ -41,14 +43,17 @@ export default async function AdminDashboard() {
       orderBy: { user: { name: "asc" } },
     }),
     prisma.booking.findMany({
-      where: {
-        worker: { cooperativeId: coop.id },
-        status: "COMPLETED",
-        createdAt: { gte: sevenDaysAgo },
+      where: { worker: { cooperativeId: coop.id } },
+      include: {
+        worker: {
+          include: { serviceCategory: true, user: true }
+        }
       },
-      select: { id: true, amount: true, createdAt: true },
+      orderBy: { createdAt: "asc" }
     }),
   ]);
+
+  const completedBookings = allBookings.filter(b => b.status === "COMPLETED" && new Date(b.createdAt) >= sevenDaysAgo);
 
   // Derived Analytics
   const activeWorkers = workers.filter((w) => w.isVerified).length;
@@ -135,12 +140,22 @@ export default async function AdminDashboard() {
         </Card>
       </div>
 
-      {/* Analytics Charts */}
-      <AnalyticsCharts data={chartData} />
+      {/* Analytics Charts & Forecast */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <AnalyticsCharts data={chartData} />
+        </div>
+        <div className="lg:col-span-1">
+          <DemandForecast bookings={allBookings} />
+        </div>
+      </div>
+
+      {/* Heatmap Layer */}
+      <ClientHeatmapWrapper bookings={allBookings} workers={workers} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          <WorkerTable workers={formattedWorkers} />
+          <WorkerTable initialWorkers={formattedWorkers} />
         </div>
         <div className="lg:col-span-1 space-y-8">
           <CommissionForm 
