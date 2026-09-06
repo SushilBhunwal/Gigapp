@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { SignupForm } from "@/components/auth/SignupForm";
 import { prisma } from "@/lib/prisma";
 
@@ -14,3 +15,4 @@ export default async function SignupPage() {
     </div>
   );
 }
+
